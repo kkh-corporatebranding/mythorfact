@@ -1,1 +1,350 @@
-# mythorfact
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}</style>
+<title>Myth or Fact</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+/* Layout: one narrow phone-first column. Intro, then one swipe card at a time, then a result with the KKH call to action.
+   COLOURS: change the tokens below to restyle the whole page. */
+:root{
+  --bg:#EAF5FA; --surface:#FFFFFF; --ink:#12355B; --muted:#4A6483; --line:#BFD9EA;
+  --accent:#1F6B3A; --accent-ink:#FFFFFF; --accent-soft:#DFF3D5;
+  --myth-bg:#E5E7EA; --myth-ink:#3F4753; --myth-line:#8C96A3;
+  --fact-bg:#DDF3CC; --fact-ink:#12355B; --fact-line:#3E9A55;
+  --cta-bg:#12355B; --cta-ink:#FFFFFF;
+  --warm:#FFD35C; --coral:#FF8FA0; --sky:#D9EEF8; --leaf:#5DBB63; --leaf-dark:#2F8F46; --soil:#7A4E32;
+  --shadow:rgba(18,53,91,.16);
+  --font-display:'Fredoka','Trebuchet MS',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1E31; --surface:#15304B; --ink:#E8F2FA; --muted:#A6BED4; --line:#2B4B6A;
+    --accent:#6CCB78; --accent-ink:#0D1E31; --accent-soft:#1D4730;
+    --myth-bg:#2A3441; --myth-ink:#D3D8DE; --myth-line:#66717E;
+    --fact-bg:#1E4A33; --fact-ink:#D6F5DC; --fact-line:#5DBB63;
+    --cta-bg:#1E4C7A; --cta-ink:#FFFFFF; --sky:#123252; --shadow:rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1E31; --surface:#15304B; --ink:#E8F2FA; --muted:#A6BED4; --line:#2B4B6A;
+  --accent:#6CCB78; --accent-ink:#0D1E31; --accent-soft:#1D4730;
+  --myth-bg:#2A3441; --myth-ink:#D3D8DE; --myth-line:#66717E;
+  --fact-bg:#1E4A33; --fact-ink:#D6F5DC; --fact-line:#5DBB63;
+  --cta-bg:#1E4C7A; --cta-ink:#FFFFFF; --sky:#123252; --shadow:rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--font-body); font-size:17px; line-height:1.45; font-weight:600;
+  -webkit-text-size-adjust:100%; text-size-adjust:100%; -webkit-tap-highlight-color:transparent;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 32px;
+}
+.shell{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.screen{display:flex;flex-direction:column;gap:16px}
+h1,h2,h3,p{margin:0}
+.title{font-family:var(--font-display);font-weight:700;font-size:clamp(46px,15vw,68px);line-height:1;text-wrap:balance}
+.title span{color:var(--accent)}
+.lede{font-size:19px;line-height:1.4;color:var(--muted);max-width:34ch}
+.small{font-size:14px;color:var(--muted)}
+.btn{
+  font:inherit;font-weight:800;border:2px solid transparent;border-radius:16px;
+  padding:13px 20px;min-height:52px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  text-decoration:none;text-align:center;
+}
+.btn:focus-visible,.card:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);font-size:18px}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.myth{background:var(--myth-bg);color:var(--myth-ink);border-color:var(--myth-line)}
+.btn.fact{background:var(--fact-bg);color:var(--fact-ink);border-color:var(--fact-line)}
+.btn.wide{width:100%}
+
+/* intro deck */
+.deck{position:relative;height:136px;margin-bottom:6px}
+.deck .mini{
+  position:absolute;left:8%;right:8%;top:0;height:116px;background:var(--surface);border:2px solid var(--line);border-radius:22px;
+  padding:18px;font-family:var(--font-display);font-weight:600;font-size:21px;line-height:1.2;box-shadow:0 8px 20px var(--shadow);
+}
+.deck .mini.a{transform:rotate(-6deg) translateY(10px);opacity:.75}
+.deck .mini.b{transform:rotate(3deg)}
+.deck .tag{
+  position:absolute;right:14px;bottom:-14px;font-family:var(--font-body);font-weight:800;font-size:13px;letter-spacing:.16em;
+  padding:3px 12px;border-radius:10px;background:var(--myth-bg);color:var(--myth-ink);border:2px solid var(--myth-line);transform:rotate(-4deg)
+}
+
+/* progress */
+.prog{display:flex;flex-direction:column;gap:8px}
+.prog .meta{display:flex;justify-content:space-between;font-size:14px;font-weight:800;color:var(--muted);letter-spacing:.04em}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:6px;transition:width .3s ease}
+
+/* swipe card */
+.stage{position:relative;height:clamp(250px,40vh,340px);height:clamp(250px,40dvh,340px)}
+.stage::before,.stage::after{content:"";position:absolute;inset:0;border-radius:28px;background:var(--surface);border:2px solid var(--line)}
+.stage::before{transform:rotate(-3deg) scale(.96)}
+.stage::after{transform:rotate(2deg) scale(.98)}
+.card{
+  position:absolute;inset:0;z-index:2;background:var(--surface);border:2px solid var(--line);border-radius:28px;
+  padding:26px 24px;display:flex;flex-direction:column;justify-content:center;gap:14px;
+  box-shadow:0 14px 30px var(--shadow);cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;
+  transition:transform .28s ease,opacity .28s ease;will-change:transform;
+}
+.card.drag{transition:none;cursor:grabbing}
+.card.instant{transition:none}
+.card .q{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.card .statement{font-family:var(--font-display);font-weight:600;font-size:clamp(25px,7.4vw,31px);line-height:1.18;text-wrap:balance}
+.stamp{
+  position:absolute;top:16px;padding:3px 12px;border-radius:10px;font-weight:800;font-size:15px;letter-spacing:.16em;border:3px solid;opacity:0;pointer-events:none
+}
+.stamp.m{left:16px;transform:rotate(-8deg);background:var(--myth-bg);color:var(--myth-ink);border-color:var(--myth-line)}
+.stamp.f{right:16px;transform:rotate(8deg);background:var(--fact-bg);color:var(--fact-ink);border-color:var(--fact-line)}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* reveal */
+.reveal{position:absolute;inset:0;z-index:3;background:var(--surface);border:2px solid var(--line);border-radius:28px;padding:22px;display:flex;flex-direction:column;justify-content:center;gap:14px;box-shadow:0 14px 30px var(--shadow);overflow:auto}
+.verdict{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-weight:800}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 8px;border-radius:999px;font-size:15px}
+.badge.ok{background:var(--accent-soft);color:var(--accent)}
+.badge.no{background:var(--myth-bg);color:var(--myth-ink)}
+.is{font-family:var(--font-display);font-weight:600;font-size:28px;line-height:1.1}
+.reveal p.txt{font-size:19px;line-height:1.4}
+
+/* result */
+.medal{display:flex;justify-content:center}
+.medal svg{width:130px;height:130px}
+.m-ring{fill:var(--accent-soft);stroke:var(--accent);stroke-width:4}
+.m-soil{fill:var(--soil)}
+.m-stem{stroke:var(--leaf-dark);stroke-width:5;fill:none;stroke-linecap:round}
+.m-leaf{fill:var(--leaf)}
+.m-leaf2{fill:var(--leaf-dark)}
+.m-trunk{fill:var(--soil)}
+.m-fruit1{fill:var(--coral)}.m-fruit2{fill:var(--warm)}.m-fruit3{fill:#7CC8F5}
+.m-seed{fill:var(--soil)}
+.score{text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.score .n{font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--muted)}
+.score h2{font-family:var(--font-display);font-weight:700;font-size:clamp(36px,11vw,46px);line-height:1}
+.score p{font-size:19px;color:var(--muted);max-width:30ch}
+.cta{background:var(--cta-bg);color:var(--cta-ink);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.cta h3{font-family:var(--font-display);font-weight:600;font-size:27px;line-height:1.1}
+.cta p{font-size:16px;opacity:.95}
+.cta .btn{background:#FFFFFF;color:#12355B}
+.foot{font-size:13px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion: reduce){.card,.bar i{transition:none}}
+</style>
+
+<div class="shell">
+  <main>
+    <!-- INTRO -->
+    <section id="intro" class="screen">
+      <div class="deck" aria-hidden="true">
+        <div class="mini a">If it doesn't run in my family, I can't be a carrier.</div>
+        <div class="mini b">Folic acid is only needed once you're pregnant.<span class="tag">MYTH?</span></div>
+      </div>
+      <h1 class="title">Myth or <span>Fact?</span></h1>
+      <p class="lede">Eight quick cards about getting ready for a family. Swipe right for fact, left for myth.</p>
+      <button class="btn primary wide" id="startBtn" type="button">Start</button>
+      <p class="small">About 2 minutes. Nothing you answer is saved or sent.</p>
+    </section>
+
+    <!-- PLAY -->
+    <section id="play" class="screen" hidden>
+      <div class="prog">
+        <div class="meta"><span id="progLabel">Card 1 of 8</span><span>Swipe or tap</span></div>
+        <div class="bar" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" id="progBar"><i id="progFill"></i></div>
+      </div>
+      <div class="stage" id="stage">
+        <div class="card" id="card" tabindex="0" aria-label="Statement card. Swipe right for fact, left for myth, or use the buttons below.">
+          <span class="stamp m" id="stampMyth">MYTH</span>
+          <span class="stamp f" id="stampFact">FACT</span>
+          <div class="q">Myth or fact?</div>
+          <div class="statement" id="cardText"></div>
+        </div>
+        <div class="reveal" id="reveal" role="status" aria-live="polite" hidden>
+          <div class="verdict"><span class="badge" id="revealBadge"></span></div>
+          <div class="is" id="revealIs"></div>
+          <p class="txt" id="revealText"></p>
+        </div>
+      </div>
+      <div class="controls" id="controls">
+        <button class="btn myth" id="btnMyth" type="button">&larr; Myth</button>
+        <button class="btn fact" id="btnFact" type="button">Fact &rarr;</button>
+      </div>
+      <button class="btn primary wide" id="nextBtn" type="button" hidden>Next card</button>
+    </section>
+
+    <!-- RESULT -->
+    <section id="result" class="screen" hidden>
+      <div class="medal" id="medal" aria-hidden="true"></div>
+      <div class="score">
+        <span class="n" id="scoreN"></span>
+        <h2 id="tierName"></h2>
+        <p id="tierMsg"></p>
+      </div>
+      <div class="cta">
+        <h3>Ready to take the next step?</h3>
+        <p>Learn more about preconception services at KKH.</p>
+        <a class="btn wide" id="ctaLink" href="#" target="_blank" rel="noopener">Learn more at KKH</a>
+        <p id="ctaContact"></p>
+      </div>
+      <button class="btn ghost wide" id="againBtn" type="button">Play again</button>
+    </section>
+  </main>
+
+  <p class="foot">General information only, not medical advice.</p>
+</div>
+
+<script>
+(function(){
+  /* ---- EDIT THESE BEFORE PUBLISHING ---- */
+  var CONFIG = {
+    linkUrl: "",                                  /* paste the KKH preconception page link here, inside the quotes */
+    linkLabel: "Learn more at KKH",
+    contactText: "Or contact [NUMBER / EMAIL]"    /* replace with the real number or email */
+  };
+
+  var CARDS = [
+    {text:"Preconception checks are only for couples who struggle to conceive.", answer:"myth",
+     reveal:"They're for anyone planning a family, ideally before you start trying."},
+    {text:"Folic acid helps most when you start before you conceive.", answer:"fact",
+     reveal:"Early development happens before many people know they're pregnant, so starting early helps protect against birth defects."},
+    {text:"If no one in my family has a genetic condition, I can't be a carrier.", answer:"myth",
+     reveal:"Most carriers of recessive conditions have no symptoms or family history. Genetic screening can tell you."},
+    {text:"If I feel healthy, I don't need a check.", answer:"myth",
+     reveal:"Some conditions are silent, and existing medications and vaccinations are worth reviewing before pregnancy."},
+    {text:"Knowing your fertile window can improve your chances of conceiving.", answer:"fact",
+     reveal:"Identify your most fertile days and aim for regular intimacy."},
+    {text:"Fertility is only a woman's issue.", answer:"myth",
+     reveal:"Both partners play a part, so both are assessed."},
+    {text:"Emotional wellbeing is part of getting ready for pregnancy.", answer:"fact",
+     reveal:"Mental wellness checks and support are part of preconception care."},
+    {text:"Your weight, diet and activity level can affect pregnancy health.", answer:"fact",
+     reveal:"A lifestyle review helps you start from your best condition."}
+  ];
+
+  var TIERS = [
+    {min:7, id:"tree",   name:"Myth Buster",   msg:"You know your stuff! Share it with a friend who is planning a family."},
+    {min:4, id:"sprout", name:"Getting There", msg:"You have busted some myths. Find out more about the 4S to fill in the gaps."},
+    {min:0, id:"seed",   name:"Fresh Start",   msg:"Lots of people believe these myths, so you are in good company. Now you know."}
+  ];
+
+  var MEDALS = {
+    seed:'<svg viewBox="0 0 120 120"><circle class="m-ring" cx="60" cy="60" r="56"/><ellipse class="m-soil" cx="60" cy="84" rx="30" ry="10"/><ellipse class="m-seed" cx="60" cy="72" rx="9" ry="6"/><path class="m-stem" d="M60 68 V56"/><path class="m-leaf" d="M60 58 C60 48 52 44 44 44 C44 52 50 58 60 58 Z"/></svg>',
+    sprout:'<svg viewBox="0 0 120 120"><circle class="m-ring" cx="60" cy="60" r="56"/><ellipse class="m-soil" cx="60" cy="88" rx="32" ry="10"/><path class="m-stem" d="M60 84 V48"/><path class="m-leaf" d="M60 56 C60 40 46 34 32 34 C32 48 44 56 60 56 Z"/><path class="m-leaf2" d="M60 48 C60 32 74 26 88 26 C88 40 76 48 60 48 Z"/></svg>',
+    tree:'<svg viewBox="0 0 120 120"><circle class="m-ring" cx="60" cy="60" r="56"/><ellipse class="m-soil" cx="60" cy="92" rx="30" ry="9"/><path class="m-trunk" d="M55 92 L57 62 L63 62 L65 92 Z"/><circle class="m-leaf" cx="60" cy="46" r="24"/><circle class="m-leaf2" cx="44" cy="54" r="15"/><circle class="m-leaf2" cx="76" cy="54" r="15"/><circle class="m-fruit1" cx="60" cy="40" r="6"/><circle class="m-fruit2" cx="45" cy="55" r="5"/><circle class="m-fruit3" cx="75" cy="55" r="5"/></svg>'
+  };
+
+  var ICON_OK = '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="currentColor"/><path d="M6.5 11.5 L9.7 14.5 L15.5 8" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ICON_NO = '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="currentColor"/><path d="M7.5 7.5 L14.5 14.5 M14.5 7.5 L7.5 14.5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var $ = function(id){ return document.getElementById(id); };
+  var intro=$("intro"), play=$("play"), result=$("result");
+  var card=$("card"), cardText=$("cardText"), stampM=$("stampMyth"), stampF=$("stampFact");
+  var controls=$("controls"), reveal=$("reveal"), nextBtn=$("nextBtn");
+  var idx=0, score=0, locked=false, answers=[];
+  var dragging=false, startX=0, dx=0;
+
+  function show(el){ [intro,play,result].forEach(function(s){ s.hidden = (s!==el); }); window.scrollTo(0,0); }
+
+  function setCard(x){
+    card.style.transform = "translateX("+x+"px) rotate("+(x/18)+"deg)";
+    var p = Math.min(Math.abs(x)/90, 1);
+    stampM.style.opacity = x<0 ? p : 0;
+    stampF.style.opacity = x>0 ? p : 0;
+  }
+
+  function loadCard(){
+    card.classList.add("instant");
+    card.style.transform = ""; card.style.opacity = "1";
+    stampM.style.opacity = 0; stampF.style.opacity = 0;
+    cardText.textContent = CARDS[idx].text;
+    void card.offsetWidth;
+    card.classList.remove("instant");
+    $("progLabel").textContent = "Card "+(idx+1)+" of "+CARDS.length;
+    $("progFill").style.width = (idx/CARDS.length*100)+"%";
+    $("progBar").setAttribute("aria-valuenow", String(idx));
+    controls.hidden = false; reveal.hidden = true; nextBtn.hidden = true; card.style.visibility = "visible"; locked = false;
+  }
+
+  function choose(side){
+    if(locked) return;
+    locked = true;
+    var c = CARDS[idx], right = (side===c.answer);
+    if(right) score++;
+    answers.push({side:side, right:right});
+    var dir = side==="fact" ? 1 : -1;
+    card.style.transform = "translateX("+(dir*520)+"px) rotate("+(dir*22)+"deg)";
+    card.style.opacity = "0";
+    $("progFill").style.width = ((idx+1)/CARDS.length*100)+"%";
+    $("progBar").setAttribute("aria-valuenow", String(idx+1));
+    var b = $("revealBadge");
+    b.className = "badge " + (right?"ok":"no");
+    b.innerHTML = (right?ICON_OK:ICON_NO) + (right?"Correct":"Not quite");
+    $("revealIs").textContent = "It's a " + (c.answer==="myth"?"myth":"fact");
+    $("revealText").textContent = c.reveal;
+    nextBtn.textContent = (idx===CARDS.length-1) ? "See my result" : "Next card";
+    setTimeout(function(){
+      controls.hidden = true; reveal.hidden = false; nextBtn.hidden = false; card.style.visibility = "hidden";
+      try{ nextBtn.focus({preventScroll:true}); }catch(err){}
+    }, reduce ? 0 : 200);
+  }
+
+  function finish(){
+    var tier = TIERS.filter(function(t){ return score>=t.min; })[0];
+    $("medal").innerHTML = MEDALS[tier.id];
+    $("scoreN").textContent = score+" / "+CARDS.length;
+    $("tierName").textContent = tier.name;
+    $("tierMsg").textContent = tier.msg;
+    var link = $("ctaLink");
+    link.textContent = CONFIG.linkLabel;
+    link.href = CONFIG.linkUrl || "#";
+    $("ctaContact").textContent = CONFIG.contactText;
+    show(result);
+  }
+
+  function start(){ idx=0; score=0; answers=[]; show(play); loadCard(); }
+
+  $("startBtn").addEventListener("click", start);
+  $("againBtn").addEventListener("click", start);
+  $("btnMyth").addEventListener("click", function(){ choose("myth"); });
+  $("btnFact").addEventListener("click", function(){ choose("fact"); });
+  nextBtn.addEventListener("click", function(){
+    if(idx===CARDS.length-1){ finish(); } else { idx++; loadCard(); }
+  });
+
+  card.addEventListener("pointerdown", function(e){
+    if(locked) return;
+    dragging = true; startX = e.clientX; dx = 0;
+    try{ card.setPointerCapture(e.pointerId); }catch(err){}
+    card.classList.add("drag");
+  });
+  card.addEventListener("pointermove", function(e){
+    if(!dragging) return;
+    dx = e.clientX - startX; setCard(dx);
+  });
+  function endDrag(){
+    if(!dragging) return;
+    dragging = false; card.classList.remove("drag");
+    if(Math.abs(dx) > 90){ choose(dx>0 ? "fact" : "myth"); } else { setCard(0); }
+  }
+  card.addEventListener("pointerup", endDrag);
+  card.addEventListener("pointercancel", endDrag);
+
+  document.addEventListener("keydown", function(e){
+    if(play.hidden || locked) return;
+    if(e.key==="ArrowLeft"){ e.preventDefault(); choose("myth"); }
+    if(e.key==="ArrowRight"){ e.preventDefault(); choose("fact"); }
+  });
+})();
+</script>
+</body>
+</html>
